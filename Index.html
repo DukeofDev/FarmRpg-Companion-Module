@@ -1,1 +1,294 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #202020;
+            color: #FFFFFF;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-radius: 10px;
+            width: 320px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        .header, .footer {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .tab {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .tab button {
+            background-color: #3e3e3e;
+            border: 1px solid #555555;
+            padding: 10px;
+            color: #FFFFFF;
+            cursor: pointer;
+            border-radius: 5px;
+            flex: 1;
+            margin: 0 5px;
+        }
+        .tab button.active {
+            background-color: #555555;
+        }
+        .section {
+            background-color: #383838;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            margin: 0;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+        .section-content {
+            margin-top: 10px;
+            display: none;
+        }
+        .progress-bar {
+            background-color: #1abc9c;
+            height: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .progress-bar::after {
+            content: attr(data-time);
+            position: absolute;
+            right: 10px;
+            top: -20px;
+            font-size: 0.8em;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+        .buttons button {
+            background-color: #3498db;
+            border: none;
+            padding: 8px 10px;
+            color: #ecf0f1;
+            cursor: pointer;
+            border-radius: 5px;
+            flex: 1;
+            margin: 0 5px;
+        }
+        .active-meals {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .meal {
+            display: flex;
+            justify-content: space-between;
+        }
+        .meal button {
+            background-color: #e74c3c;
+            border: none;
+            padding: 5px 10px;
+            color: #ecf0f1;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .resources {
+            display: flex;
+            justify-content: space-between;
+        }
+        .resource {
+            text-align: center;
+            flex: 1;
+        }
+        .resource img {
+            width: 30px;
+            height: 30px;
+        }
+        .resource div {
+            margin-top: 5px;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const stamina = 63000;
+            const maxInventory = 11000;
+            const resources = {
+                wood: 11270,
+                stone: 11270,
+                wheat: 11270,
+                iron: 11270,
+                gold: 11234
+            };
+            const cropTime = 600; // 10 minutes in seconds
+
+            document.getElementById('stamina').innerText = `Stamina: 0/${stamina}`;
+            document.getElementById('maxInventory').innerText = `Max Inventory: ${maxInventory}`;
+            
+            for (const [resource, amount] of Object.entries(resources)) {
+                document.getElementById(resource).innerText = amount;
+            }
+
+            const toggleSection = (header, content) => {
+                header.addEventListener('click', () => {
+                    content.style.display = content.style.display === 'none' ? 'block' : 'none';
+                });
+            };
+
+            toggleSection(document.getElementById('cropHeader'), document.getElementById('cropContent'));
+            toggleSection(document.getElementById('cookingHeader'), document.getElementById('cookingContent'));
+            toggleSection(document.getElementById('mealsHeader'), document.getElementById('mealsContent'));
+
+            let cropRemainingTime = cropTime;
+            const progressBar = document.getElementById('progressBar');
+            
+            const updateProgressBar = () => {
+                const percentage = (cropRemainingTime / cropTime) * 100;
+                progressBar.style.width = `${percentage}%`;
+                const minutes = Math.floor(cropRemainingTime / 60);
+                const seconds = cropRemainingTime % 60;
+                progressBar.setAttribute('data-time', `${minutes}m ${seconds}s`);
+                if (cropRemainingTime > 0) {
+                    cropRemainingTime--;
+                    setTimeout(updateProgressBar, 1000);
+                } else {
+                    alert('Crop is ready to harvest!');
+                }
+            };
+
+            updateProgressBar();
+
+            document.getElementById('plantAll').addEventListener('click', () => {
+                alert('Planting all crops!');
+            });
+            
+            document.getElementById('harvestAll').addEventListener('click', () => {
+                alert('Harvesting all crops!');
+            });
+            
+            document.querySelectorAll('.meal button').forEach(button => {
+                button.addEventListener('click', () => {
+                    alert('Eating one more!');
+                });
+            });
+
+            // Tab functionality
+            const tabs = document.querySelectorAll('.tab button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(btn => btn.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    tabContents.forEach(content => content.style.display = 'none');
+                    document.getElementById(tab.dataset.target).style.display = 'block';
+                });
+            });
+
+            // Default active tab
+            document.querySelector('.tab button[data-target="gameTab"]').click();
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div id="stamina"></div>
+            <div id="maxInventory"></div>
+        </div>
+        <div class="tab">
+            <button class="active" data-target="gameTab">Game</button>
+            <button data-target="calculatorTab">Calculator</button>
+            <button data-target="settingsTab">Settings</button>
+        </div>
+        <div id="gameTab" class="tab-content">
+            <div class="section">
+                <h2 id="cropHeader">Crop Timer</h2>
+                <div class="section-content" id="cropContent">
+                    <h3>Wheat</h3>
+                    <div class="progress-bar" id="progressBar" data-time="10m 0s" style="width: 100%;"></div>
+                    <div class="buttons">
+                        <button id="plantAll">Plant All</button>
+                        <button id="harvestAll">Harvest All</button>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <h2 id="cookingHeader">Cooking Timer</h2>
+                <div class="section-content" id="cookingContent">
+                    <!-- Cooking Timer Content Here -->
+                </div>
+            </div>
+            <div class="section">
+                <h2 id="mealsHeader">Active Meals</h2>
+                <div class="section-content" id="mealsContent">
+                    <div class="active-meals">
+                        <div class="meal">
+                            <span>Hickory Omelette (432h14m23s)</span>
+                            <button>Eat 1 more</button>
+                        </div>
+                        <div class="meal">
+                            <span>Example Meal (10h30m)</span>
+                            <button>Eat 1 more</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="calculatorTab" class="tab-content" style="display: none;">
+            <!-- Calculator Content Here -->
+            <div class="section">
+                <h2>Calculator</h2>
+                <div class="section-content">
+                    <p>Calculator functionality goes here.</p>
+                </div>
+            </div>
+        </div>
+        <div id="settingsTab" class="tab-content" style="display: none;">
+            <!-- Settings Content Here -->
+            <div class="section">
+                <h2>Settings</h2>
+                <div class="section-content">
+                    <p>Settings functionality goes here.</p>
+                </div>
+            </div>
+        </div>
+        <div class="footer resources">
+            <div class="resource">
+                <img src="https://via.placeholder.com/30" alt="Wood">
+                <div id="wood"></div>
+            </div>
+            <div class="resource">
+                <img src="https://via.placeholder.com/30" alt="Stone">
+                <div id="stone"></div>
+            </div>
+            <div class="resource">
+                <img src="https://via.placeholder.com/30" alt="Wheat">
+                <div id="wheat"></div>
+            </div>
+            <div class="resource">
+                <img src="https://via.placeholder.com/30" alt="Iron">
+                <div id="iron"></div>
+            </div>
+            <div class="resource">
+                <img src="https://via.placeholder.com/30" alt="Gold">
+                <div id="gold"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
